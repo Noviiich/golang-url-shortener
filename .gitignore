@@ -7,3 +7,4 @@
 *.out
 go.work
 sam-app
+.env
