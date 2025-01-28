@@ -44,7 +44,7 @@ func NewMongoDbStore(ctx context.Context, database, collection string) *MongoDBS
 	}
 }
 
-func (d *MongoDBStore) All(ctx context.Context, next *string) ([]types.Link, error) {
+func (d *MongoDBStore) All(ctx context.Context) ([]types.Link, error) {
 	cursor, err := d.Collection.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, fmt.Errorf("документ не найден: %w", err)

@@ -11,8 +11,8 @@ type Link struct {
 	db types.DB
 }
 
-func NewLink(db types.DB) *Link {
-	return &Link{db}
+func NewLinkDomain(d types.DB) *Link {
+	return &Link{db: d}
 }
 
 func (s *Link) All(ctx context.Context) ([]types.Link, error) {
@@ -26,7 +26,7 @@ func (s *Link) All(ctx context.Context) ([]types.Link, error) {
 func (s *Link) Get(ctx context.Context, short string) (types.Link, error) {
 	link, err := s.db.Get(ctx, short)
 	if err != nil {
-		return types.Link{}, fmt.Errorf("ошибка при получении короткого url: %w", err)
+		return types.Link{}, fmt.Errorf("ошибка при получении короткого url for indentifier '%s': %w", short, err)
 	}
 	return link, nil
 }
@@ -42,7 +42,7 @@ func (s *Link) Create(ctx context.Context, short types.Link) error {
 func (s *Link) Delete(ctx context.Context, short string) error {
 	err := s.db.Delete(ctx, short)
 	if err != nil {
-		return fmt.Errorf("ошибка удаления короткого url: %w", err)
+		return fmt.Errorf("ошибка удаления короткого url for indentifier '%s': %w", short, err)
 	}
 	return nil
 }
