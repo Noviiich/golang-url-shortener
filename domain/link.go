@@ -11,8 +11,8 @@ type Link struct {
 	db types.DB
 }
 
-func NewLinkDomain(d types.DB) *Link {
-	return &Link{db: d}
+func NewLinkDomain(db types.DB) *Link {
+	return &Link{db: db}
 }
 
 func (s *Link) All(ctx context.Context) ([]types.Link, error) {
@@ -23,10 +23,10 @@ func (s *Link) All(ctx context.Context) ([]types.Link, error) {
 	return links, nil
 }
 
-func (s *Link) Get(ctx context.Context, short string) (types.Link, error) {
+func (s *Link) Get(ctx context.Context, short string) (*types.Link, error) {
 	link, err := s.db.Get(ctx, short)
 	if err != nil {
-		return types.Link{}, fmt.Errorf("ошибка при получении короткого url for indentifier '%s': %w", short, err)
+		return link, fmt.Errorf("ошибка при получении короткого url for indentifier '%s': %w", short, err)
 	}
 	return link, nil
 }

@@ -21,7 +21,7 @@ type MongoDBStore struct {
 	collectionName string
 }
 
-func NewMongoDbStore(ctx context.Context, database, collection string) *MongoDBStore {
+func NewMongoDBStore(ctx context.Context, database, collection string) *MongoDBStore {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	MONGO_URI := os.Getenv("MONGO_URI")
 	opts := options.Client().ApplyURI(MONGO_URI).SetServerAPIOptions(serverAPI)
@@ -59,12 +59,12 @@ func (d *MongoDBStore) All(ctx context.Context) ([]types.Link, error) {
 	return links, nil
 }
 
-func (d *MongoDBStore) Get(ctx context.Context, id string) (*types.Link, error) {
+func (d *MongoDBStore) Get(ctx context.Context, short string) (*types.Link, error) {
 	var link types.Link
-	err := d.Collection.FindOne(ctx, bson.M{"id": id}).Decode(&link)
+	err := d.Collection.FindOne(ctx, bson.M{"short": short}).Decode(&link)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("документ с id '%s' не найден", id)
+			return nil, fmt.Errorf("документ с short '%s' не найден", short)
 		}
 		return nil, fmt.Errorf("ошибка поиска документа: %w", err)
 	}
