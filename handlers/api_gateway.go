@@ -31,9 +31,10 @@ func (h *UrlShortenerHandler) CreateShortLink(w http.ResponseWriter, r *http.Req
 	}
 
 	link := types.Link{
-		Long:     requestBody.Long,
-		Short:    generateShortUrl(requestBody.Long),
-		CreateAt: time.Now(),
+		OriginalURL: requestBody.Long,
+		ShortId:     generateShortUrl(requestBody.Long),
+		CreateAt:    time.Now(),
+		Clicks:      0,
 	}
 
 	err := h.link.Create(context.Background(), link)

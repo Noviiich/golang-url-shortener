@@ -3,8 +3,8 @@ package types
 import "time"
 
 type Link struct {
-	// Id       string    `bson:"_id,omitempty" json:"id"`
-	Short    string    `bson:"short" json:"short"`
-	Long     string    `bson:"long" json:"long"`
-	CreateAt time.Time `bson:"create_at" json:"create_at"`
+	ShortId     string    `bson:"short_id" json:"short_id"`
+	OriginalURL string    `bson:"original_url" json:"original_url"`
+	CreateAt    time.Time `bson:"create_at" json:"create_at"`
+	Clicks      int       `bson:"clicks" json:"clicks"`
 }
