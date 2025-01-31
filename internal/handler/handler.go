@@ -41,6 +41,9 @@ func (h *URLHandler) CreateShortLink(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "URL должен быть больше 15 символов"})
 		return
 	}
+	if !IsValidLink(requestBody.Long) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Неправильный URL формат"})
+	}
 
 	link := model.Link{
 		ShortId:     generateShortUrl(requestBody.Long),
