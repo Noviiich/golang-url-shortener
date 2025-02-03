@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Noviiich/golang-url-shortener/internal/model"
-	"github.com/Noviiich/golang-url-shortener/internal/repository"
+	"github.com/Noviiich/golang-url-shortener/internal/adapters/repository"
+	"github.com/Noviiich/golang-url-shortener/internal/core/model"
 )
 
 type URLService struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Noviiich/golang-url-shortener/internal/config"
-	"github.com/Noviiich/golang-url-shortener/internal/model"
+	"github.com/Noviiich/golang-url-shortener/internal/core/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -92,4 +92,13 @@ func (r *URLRepository) Delete(ctx context.Context, shortID string) error {
 	}
 
 	return nil
+}
+
+func (r *URLRepository) IncrementClick(ctx context.Context, shortID string) error {
+	_, err := r.Collection.UpdateOne(
+		ctx,
+		bson.M{"short_id": shortID},
+		bson.M{"$inc": bson.M{"clicks": 1}},
+	)
+	return err
 }

@@ -8,18 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Noviiich/golang-url-shortener/internal/model"
-	"github.com/Noviiich/golang-url-shortener/internal/service"
+	"github.com/Noviiich/golang-url-shortener/internal/core/model"
 	"github.com/gin-gonic/gin"
 )
-
-type URLHandler struct {
-	service *service.URLService
-}
-
-func NewURLHandler(s *service.URLService) *URLHandler {
-	return &URLHandler{service: s}
-}
 
 type RequestBody struct {
 	Long string `json:"long"`
@@ -60,34 +51,6 @@ func (h *URLHandler) CreateShortLink(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{})
 }
-
-func (h *URLHandler) RedirectShortURL(c *gin.Context) {
-	shortID := c.Param("shortID")
-	link, err := h.service.Get(context.Background(), shortID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.Redirect(http.StatusFound, link.OriginalURL)
-}
-
-// func (h *UrlShortenerHandler) GetOriginalUrl(w http.ResponseWriter, r *http.Request) {
-// 	shortLink := r.URL.Path[1:]
-// 	longLink, err := h.link.Get(context.Background(), shortLink)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusNotFound)
-// 		return
-// 	}
-
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(http.StatusOK)
-// 	response := map[string]string{
-// 		"long": longLink.OriginalURL,
-// 	}
-// 	json.NewEncoder(w).Encode(response)
-
-// }
 
 func generateShortUrl(longUrl string) string {
 	hasher := md5.New()
