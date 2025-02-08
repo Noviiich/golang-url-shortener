@@ -23,8 +23,8 @@ func reverseProxy(target string) gin.HandlerFunc {
 
 func main() {
 	router := gin.Default()
-	router.POST("/genarate", reverseProxy("http://localhost:8081"))
-	router.GET("/:shortID", reverseProxy("http://localhost:8082"))
+	router.POST("/genarate", reverseProxy("https://golang-url-shortener-esii.onrender.com:8081"))
+	router.GET("/:shortID", reverseProxy("https://golang-url-shortener-esii.onrender.com:8082"))
 
 	log.Println("API Gateway запущен на порту :8080")
 	if err := router.Run(":8080"); err != nil {
