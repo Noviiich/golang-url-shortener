@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Noviiich/golang-url-shortener/internal/adapters/cache"
 	"github.com/Noviiich/golang-url-shortener/internal/adapters/handler"
 	"github.com/Noviiich/golang-url-shortener/internal/adapters/mock"
 	"github.com/Noviiich/golang-url-shortener/internal/core/service"
@@ -17,9 +16,9 @@ import (
 func setupTest(body string) (*httptest.ResponseRecorder, error) {
 	gin.SetMode(gin.ReleaseMode)
 
-	mock := mock.NewMockRepository()
-	cache := cache.NewRedisCache("localhost:6379", "", 0)
-	service := service.NewURLService(mock, cache)
+	mockDB := mock.NewMockRepository()
+	cache := mock.NewMockRedisCache()
+	service := service.NewURLService(mockDB, cache)
 	handler := handler.NewURLHandler(service)
 
 	router := gin.Default()
