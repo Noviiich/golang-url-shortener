@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupTest(body string) (*httptest.ResponseRecorder, error) {
+func setupTestGenerate(body string) (*httptest.ResponseRecorder, error) {
 	gin.SetMode(gin.ReleaseMode)
 
 	mockDB := mock.NewMockRepository()
@@ -33,7 +33,7 @@ func setupTest(body string) (*httptest.ResponseRecorder, error) {
 
 func TestCreateShortLink_Success(t *testing.T) {
 	body := `{"long": "https://example.com/abcdefg"}`
-	response, err := setupTest(body)
+	response, err := setupTestGenerate(body)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, response.Code)
@@ -46,7 +46,7 @@ func TestCreateShortLink_Success(t *testing.T) {
 
 func TestCreateShortLink_EmptyString(t *testing.T) {
 	body := `{"long":""}`
-	response, err := setupTest(body)
+	response, err := setupTestGenerate(body)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, response.Code)
@@ -54,7 +54,7 @@ func TestCreateShortLink_EmptyString(t *testing.T) {
 
 func TestCreateShoreLink_InvalidURL(t *testing.T) {
 	body := `{"long": "invalid"}`
-	response, err := setupTest(body)
+	response, err := setupTestGenerate(body)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, response.Code)

@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupTest(shortID string) (*httptest.ResponseRecorder, error) {
+func setupTestRedirect(shortID string) (*httptest.ResponseRecorder, error) {
 	gin.SetMode(gin.ReleaseMode)
 	mockDB := mock.NewMockRepository()
 	cache := mock.NewMockRedisCache()
@@ -34,7 +34,7 @@ func setupTest(shortID string) (*httptest.ResponseRecorder, error) {
 
 func TestRedirectShortURL_Success(t *testing.T) {
 	shortID := "testid1"
-	response, err := setupTest(shortID)
+	response, err := setupTestRedirect(shortID)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusFound, response.Code)
@@ -42,7 +42,7 @@ func TestRedirectShortURL_Success(t *testing.T) {
 
 func TestRedirectShortURL_NotFound(t *testing.T) {
 	shortID := "nonexistentid"
-	response, err := setupTest(shortID)
+	response, err := setupTestRedirect(shortID)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusNotFound, response.Code)
