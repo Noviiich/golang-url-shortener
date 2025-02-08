@@ -37,19 +37,19 @@ func (h *URLHandler) CreateShortLink(c *gin.Context) {
 	}
 
 	link := model.Link{
-		ShortId:     generateShortUrl(requestBody.Long),
+		ShortID:     generateShortUrl(requestBody.Long),
 		OriginalURL: requestBody.Long,
 		CreateAt:    time.Now(),
 		Clicks:      0,
 	}
 
-	err := h.service.Create(context.Background(), &link)
+	key, err := h.service.Create(context.Background(), &link)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{})
+	c.JSON(http.StatusCreated, gin.H{"key": key})
 }
 
 func generateShortUrl(longUrl string) string {

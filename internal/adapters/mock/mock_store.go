@@ -14,9 +14,9 @@ type MockRepository struct {
 func NewMockRepository() *MockRepository {
 	return &MockRepository{
 		Links: map[string]model.Link{
-			"testid1": {ShortId: "testid1", OriginalURL: "https://example.com/link1"},
-			"testid2": {ShortId: "testid1", OriginalURL: "https://example.com/link1"},
-			"testid3": {ShortId: "testid1", OriginalURL: "https://example.com/link1"},
+			"testid1": {ShortID: "testid1", OriginalURL: "https://example.com/link1"},
+			"testid2": {ShortID: "testid1", OriginalURL: "https://example.com/link1"},
+			"testid3": {ShortID: "testid1", OriginalURL: "https://example.com/link1"},
 		},
 	}
 }
@@ -35,10 +35,10 @@ func (m *MockRepository) Get(ctx context.Context, shortID string) (*model.Link, 
 	return nil, errors.New("link not found")
 }
 func (m *MockRepository) Create(ctx context.Context, link *model.Link) error {
-	if _, ok := m.Links[link.ShortId]; ok {
+	if _, ok := m.Links[link.ShortID]; ok {
 		return errors.New("link already exists")
 	}
-	m.Links[link.ShortId] = *link
+	m.Links[link.ShortID] = *link
 	return nil
 }
 func (m *MockRepository) Delete(ctx context.Context, shortID string) error {
