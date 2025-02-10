@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Noviiich/golang-url-shortener/internal/core/model"
+	"github.com/Noviiich/golang-url-shortener/internal/core/domain"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,20 +36,19 @@ func (h *URLHandler) CreateShortLink(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Неправильный URL формат"})
 	}
 
-	link := model.Link{
+	link := domain.Link{
 		ShortID:     generateShortUrl(requestBody.Long),
 		OriginalURL: requestBody.Long,
 		CreateAt:    time.Now(),
-		Clicks:      0,
 	}
 
-	key, err := h.service.Create(context.Background(), &link)
+	err := h.service.Create(context.Background(), &link)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"key": key})
+	c.JSON(http.StatusCreated, gin.H{"key": link.ShortID})
 }
 
 func generateShortUrl(longUrl string) string {

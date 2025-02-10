@@ -4,23 +4,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Noviiich/golang-url-shortener/internal/core/model"
+	"github.com/Noviiich/golang-url-shortener/internal/core/domain"
 	"github.com/Noviiich/golang-url-shortener/internal/core/ports"
 )
 
-type URLService struct {
-	db    model.DB
+type LinkService struct {
+	db    ports.LinkPort
 	cache ports.Cache
 }
 
-func NewURLService(db model.DB, cache ports.Cache) *URLService {
-	return &URLService{
+func NewLinkService(db ports.LinkPort, cache ports.Cache) *LinkService {
+	return &LinkService{
 		db:    db,
 		cache: cache,
 	}
 }
 
-func (s *URLService) All(ctx context.Context) ([]model.Link, error) {
+func (s *LinkService) All(ctx context.Context) ([]domain.Link, error) {
 	links, err := s.db.All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при получении всех коротких urls: %w", err)
@@ -28,7 +28,7 @@ func (s *URLService) All(ctx context.Context) ([]model.Link, error) {
 	return links, nil
 }
 
-func (s *URLService) GetOriginalURL(ctx context.Context, shortID string) (*string, error) {
+func (s *LinkService) GetOriginalURL(ctx context.Context, shortID string) (*string, error) {
 	//link, err := s.db.Get(ctx, shortID)
 	link, err := s.cache.Get(ctx, shortID)
 	if err != nil {
@@ -37,19 +37,19 @@ func (s *URLService) GetOriginalURL(ctx context.Context, shortID string) (*strin
 	return &link, nil
 }
 
-func (s *URLService) Create(ctx context.Context, link *model.Link) (string, error) {
-	key, err := s.cache.Set(ctx, link.ShortID, link.OriginalURL)
+func (s *LinkService) Create(ctx context.Context, link *domain.Link) error {
+	_, err := s.cache.Set(ctx, link.ShortID, link.OriginalURL)
 	if err != nil {
-		return "", fmt.Errorf("failed to set short URL for identifier '%s': %w", link.ShortID, err)
+		return fmt.Errorf("failed to set short URL for identifier '%s': %w", link.ShortID, err)
 	}
 	err = s.db.Create(ctx, link)
 	if err != nil {
-		return "", fmt.Errorf("ошибка создания короткого url: %w", err)
+		return fmt.Errorf("ошибка создания короткого url: %w", err)
 	}
-	return key, nil
+	return nil
 }
 
-func (s *URLService) Delete(ctx context.Context, shortID string) error {
+func (s *LinkService) Delete(ctx context.Context, shortID string) error {
 	err := s.db.Delete(ctx, shortID)
 	if err != nil {
 		return fmt.Errorf("ошибка удаления короткого url for indentifier '%s': %w", shortID, err)

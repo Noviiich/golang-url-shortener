@@ -5,9 +5,9 @@ import (
 )
 
 type URLHandler struct {
-	service *service.URLService
+	service *service.LinkService
 }
 
-func NewURLHandler(s *service.URLService) *URLHandler {
+func NewURLHandler(s *service.LinkService) *URLHandler {
 	return &URLHandler{service: s}
 }

@@ -5,18 +5,18 @@ import (
 	"fmt"
 
 	"github.com/Noviiich/golang-url-shortener/internal/config"
-	"github.com/Noviiich/golang-url-shortener/internal/core/model"
+	"github.com/Noviiich/golang-url-shortener/internal/core/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type URLRepository struct {
-	Client     *mongo.Client
-	Collection *mongo.Collection
+type StatsRepository struct {
+	client     *mongo.Client
+	collection *mongo.Collection
 }
 
-func NewURLRepository(cfg *config.Config) (*URLRepository, error) {
+func NewStatsRepository(cfg *config.Config) (*StatsRepository, error) {
 	if cfg.MongoURI == "" {
 		return nil, fmt.Errorf("MongoDB URI is empty")
 	}
@@ -43,20 +43,20 @@ func NewURLRepository(cfg *config.Config) (*URLRepository, error) {
 
 	coll := client.Database(cfg.Database).Collection(cfg.Collection)
 
-	return &URLRepository{
-		Client:     client,
-		Collection: coll,
+	return &StatsRepository{
+		client:     client,
+		collection: coll,
 	}, nil
 }
 
-func (r *URLRepository) All(ctx context.Context) ([]model.Link, error) {
-	cursor, err := r.Collection.Find(ctx, bson.D{})
+func (r *StatsRepository) All(ctx context.Context) ([]domain.Link, error) {
+	cursor, err := r.collection.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, fmt.Errorf("документ не найден: %w", err)
 	}
 	defer cursor.Close(ctx)
 
-	var links []model.Link
+	var links []domain.Link
 	if err = cursor.All(ctx, &links); err != nil {
 		return nil, fmt.Errorf("ошибка декодирования документа: %w", err)
 	}
@@ -64,9 +64,9 @@ func (r *URLRepository) All(ctx context.Context) ([]model.Link, error) {
 	return links, nil
 }
 
-func (r *URLRepository) Get(ctx context.Context, shortID string) (*model.Link, error) {
-	var link model.Link
-	err := r.Collection.FindOne(ctx, bson.M{"short_id": shortID}).Decode(&link)
+func (r *StatsRepository) Get(ctx context.Context, shortID string) (*domain.Link, error) {
+	var link domain.Link
+	err := r.collection.FindOne(ctx, bson.M{"short_id": shortID}).Decode(&link)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("документ с short_id '%s' не найден", shortID)
@@ -77,28 +77,19 @@ func (r *URLRepository) Get(ctx context.Context, shortID string) (*model.Link, e
 	return &link, nil
 }
 
-func (r *URLRepository) Create(ctx context.Context, link *model.Link) error {
-	_, err := r.Collection.InsertOne(ctx, link)
+func (r *StatsRepository) Create(ctx context.Context, link *domain.Link) error {
+	_, err := r.collection.InsertOne(ctx, link)
 	if err != nil {
 		return fmt.Errorf("не удалось добавить элемент в MongoDB: %w", err)
 	}
 	return nil
 }
 
-func (r *URLRepository) Delete(ctx context.Context, shortID string) error {
-	_, err := r.Collection.DeleteOne(ctx, bson.M{"short_id": shortID})
+func (r *StatsRepository) Delete(ctx context.Context, shortID string) error {
+	_, err := r.collection.DeleteOne(ctx, bson.M{"short_id": shortID})
 	if err != nil {
 		return fmt.Errorf("ошибка удаления элемента из MongoDB: %w", err)
 	}
 
 	return nil
-}
-
-func (r *URLRepository) IncrementClick(ctx context.Context, shortID string) error {
-	_, err := r.Collection.UpdateOne(
-		ctx,
-		bson.M{"short_id": shortID},
-		bson.M{"$inc": bson.M{"clicks": 1}},
-	)
-	return err
 }
