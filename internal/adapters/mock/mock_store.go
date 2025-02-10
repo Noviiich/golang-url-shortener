@@ -8,15 +8,15 @@ import (
 )
 
 type MockRepository struct {
-	Links map[string]model.Link
+	Links []model.Link
 }
 
 func NewMockRepository() *MockRepository {
 	return &MockRepository{
-		Links: map[string]model.Link{
-			"testid1": {ShortID: "testid1", OriginalURL: "https://example.com/link1"},
-			"testid2": {ShortID: "testid1", OriginalURL: "https://example.com/link1"},
-			"testid3": {ShortID: "testid1", OriginalURL: "https://example.com/link1"},
+		Links: []model.Link{
+			{ShortID: "testid1", OriginalURL: "https://example.com/link1"},
+			{ShortID: "testid2", OriginalURL: "https://example.com/link2"},
+			{ShortID: "testid3", OriginalURL: "https://example.com/link3"},
 		},
 	}
 }
@@ -29,22 +29,28 @@ func (m *MockRepository) All(ctx context.Context) ([]model.Link, error) {
 	return links, nil
 }
 func (m *MockRepository) Get(ctx context.Context, shortID string) (*model.Link, error) {
-	if link, ok := m.Links[shortID]; ok {
-		return &link, nil
+	for _, link := range m.Links {
+		if link.ShortID == shortID {
+			return &link, nil
+		}
 	}
-	return nil, errors.New("link not found")
+	return &model.Link{}, errors.New("link not found")
 }
 func (m *MockRepository) Create(ctx context.Context, link *model.Link) error {
-	if _, ok := m.Links[link.ShortID]; ok {
-		return errors.New("link already exists")
+	for _, l := range m.Links {
+		if l.ShortID == link.ShortID {
+			return errors.New("link already exists")
+		}
 	}
-	m.Links[link.ShortID] = *link
+	m.Links = append(m.Links, *link)
 	return nil
 }
 func (m *MockRepository) Delete(ctx context.Context, shortID string) error {
-	if _, ok := m.Links[shortID]; !ok {
-		return errors.New("link not found")
+	for i, link := range m.Links {
+		if link.ShortID == shortID {
+			m.Links = append(m.Links[:i], m.Links[i+1:]...)
+			return nil
+		}
 	}
-	delete(m.Links, shortID)
-	return nil
+	return errors.New("link not found")
 }
