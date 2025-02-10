@@ -1,61 +1,92 @@
-package main
+package unit
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
-	"github.com/Noviiich/golang-url-shortener/internal/adapters/handler"
-	"github.com/Noviiich/golang-url-shortener/internal/adapters/mock"
-	"github.com/Noviiich/golang-url-shortener/internal/core/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
-func setupTestGenerate(body string) (*httptest.ResponseRecorder, error) {
-	gin.SetMode(gin.ReleaseMode)
+func TestGenerateUnit(t *testing.T) {
+	apiHandler := setupTestGenerate()
 
-	mockDB := mock.NewMockRepository()
-	cache := mock.NewMockRedisCache()
-	service := service.NewURLService(mockDB, cache)
-	handler := handler.NewURLHandler(service)
+	tests := []struct {
+		longURL            string
+		expectedStatusCode int
+		expectedBody       string
+	}{
+		{
+			longURL:            "https://example.com/abcdefg",
+			expectedStatusCode: http.StatusCreated,
+			expectedBody:       "",
+		},
+		{
+			longURL:            "",
+			expectedStatusCode: http.StatusBadRequest,
+			expectedBody:       "URL не должен быть пустым",
+		},
+		{
+			longURL:            "invalid",
+			expectedStatusCode: http.StatusBadRequest,
+			expectedBody:       "URL должен быть больше 15 символов",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.longURL, func(t *testing.T) {
+			body := `{"long": "` + test.longURL + `"}`
+			req, err := http.NewRequest("POST", "/generate", strings.NewReader(body))
+			assert.NoError(t, err)
+
+			res := httptest.NewRecorder()
+			apiHandler.ServeHTTP(res, req)
+
+			assert.Equal(t, test.expectedStatusCode, res.Code)
+			if test.expectedStatusCode != http.StatusCreated {
+				assert.Contains(t, res.Body.String(), test.expectedBody)
+			}
+		})
+
+	}
+}
+
+func setupTestGenerate() *gin.Engine {
+	handler := SetupTest()
 
 	router := gin.Default()
-	router.POST("/genarate", handler.CreateShortLink)
+	router.POST("/generate", handler.CreateShortLink)
 
-	req, err := http.NewRequest("POST", "/genarate", bytes.NewReader([]byte(body)))
-	response := httptest.NewRecorder()
-	router.ServeHTTP(response, req)
-
-	return response, err
+	return router
 }
 
-func TestCreateShortLink_Success(t *testing.T) {
-	body := `{"long": "https://example.com/abcdefg"}`
-	response, err := setupTestGenerate(body)
+// func TestCreateShortLink_Success(t *testing.T) {
+// 	body := `{"long": "https://example.com/abcdefg"}`
+// 	response, err := setupTestGenerate(body)
 
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusCreated, response.Code)
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, http.StatusCreated, response.Code)
 
-	// var link model.Link
-	// err := json.Unmarshal([]byte(w.Body.String()), &link)                     потом добавить, чтобы возвращался ответ
-	// assert.NoError(t, err)
-	// assert.Equal(t, "https://example.com/abcdefg", link.OriginalURL)
-}
+// 	// var link model.Link
+// 	// err := json.Unmarshal([]byte(w.Body.String()), &link)                     потом добавить, чтобы возвращался ответ
+// 	// assert.NoError(t, err)
+// 	// assert.Equal(t, "https://example.com/abcdefg", link.OriginalURL)
+// }
 
-func TestCreateShortLink_EmptyString(t *testing.T) {
-	body := `{"long":""}`
-	response, err := setupTestGenerate(body)
+// func TestCreateShortLink_EmptyString(t *testing.T) {
+// 	body := `{"long":""}`
+// 	response, err := setupTestGenerate(body)
 
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusBadRequest, response.Code)
-}
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, http.StatusBadRequest, response.Code)
+// }
 
-func TestCreateShoreLink_InvalidURL(t *testing.T) {
-	body := `{"long": "invalid"}`
-	response, err := setupTestGenerate(body)
+// func TestCreateShoreLink_InvalidURL(t *testing.T) {
+// 	body := `{"long": "invalid"}`
+// 	response, err := setupTestGenerate(body)
 
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusBadRequest, response.Code)
-}
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, http.StatusBadRequest, response.Code)
+// }
