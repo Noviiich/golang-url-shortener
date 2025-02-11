@@ -14,9 +14,9 @@ type MockRepository struct {
 func NewMockRepository() *MockRepository {
 	return &MockRepository{
 		Links: []domain.Link{
-			{ShortID: "testid1", OriginalURL: "https://example.com/link1"},
-			{ShortID: "testid2", OriginalURL: "https://example.com/link2"},
-			{ShortID: "testid3", OriginalURL: "https://example.com/link3"},
+			{Id: "testid1", OriginalURL: "https://example.com/link1"},
+			{Id: "testid2", OriginalURL: "https://example.com/link2"},
+			{Id: "testid3", OriginalURL: "https://example.com/link3"},
 		},
 	}
 }
@@ -30,7 +30,7 @@ func (m *MockRepository) All(ctx context.Context) ([]domain.Link, error) {
 }
 func (m *MockRepository) Get(ctx context.Context, shortID string) (*domain.Link, error) {
 	for _, link := range m.Links {
-		if link.ShortID == shortID {
+		if link.Id == shortID {
 			return &link, nil
 		}
 	}
@@ -38,7 +38,7 @@ func (m *MockRepository) Get(ctx context.Context, shortID string) (*domain.Link,
 }
 func (m *MockRepository) Create(ctx context.Context, link *domain.Link) error {
 	for _, l := range m.Links {
-		if l.ShortID == link.ShortID {
+		if l.Id == link.Id {
 			return errors.New("link already exists")
 		}
 	}
@@ -47,7 +47,7 @@ func (m *MockRepository) Create(ctx context.Context, link *domain.Link) error {
 }
 func (m *MockRepository) Delete(ctx context.Context, shortID string) error {
 	for i, link := range m.Links {
-		if link.ShortID == shortID {
+		if link.Id == shortID {
 			m.Links = append(m.Links[:i], m.Links[i+1:]...)
 			return nil
 		}

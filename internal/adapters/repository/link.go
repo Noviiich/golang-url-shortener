@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/Noviiich/golang-url-shortener/internal/config"
 	"github.com/Noviiich/golang-url-shortener/internal/core/domain"
@@ -16,15 +17,18 @@ type LinkRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewLinkRepository(cfg *config.Config) (*LinkRepository, error) {
+func NewLinkRepository(cfg *config.Config) *LinkRepository {
 	if cfg.MongoURI == "" {
-		return nil, fmt.Errorf("MongoDB URI is empty")
+		log.Fatal("MongoDB URI is empty")
+		return nil
 	}
 	if cfg.Database == "" {
-		return nil, fmt.Errorf("MongoDB database is empty")
+		log.Fatal("MongoDB database is empty")
+		return nil
 	}
 	if cfg.Collection == "" {
-		return nil, fmt.Errorf("MongoDB collection is empty")
+		log.Fatal("MongoDB collection is empty")
+		return nil
 	}
 
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
@@ -34,11 +38,13 @@ func NewLinkRepository(cfg *config.Config) (*LinkRepository, error) {
 
 	client, err := mongo.Connect(context.Background(), opts)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при подключении к mongoDB: %w", err)
+		log.Fatalf("ошибка при подключении к mongoDB: %v", err)
+		return nil
 	}
 
 	if err := client.Database("admin").RunCommand(context.Background(), bson.D{{Key: "ping", Value: 1}}).Err(); err != nil {
-		return nil, fmt.Errorf("ошибка проверки подключения: %w", err)
+		log.Fatalf("ошибка проверки подключения: %v", err)
+		return nil
 	}
 
 	coll := client.Database(cfg.Database).Collection(cfg.Collection)
@@ -46,7 +52,7 @@ func NewLinkRepository(cfg *config.Config) (*LinkRepository, error) {
 	return &LinkRepository{
 		Client:     client,
 		Collection: coll,
-	}, nil
+	}
 }
 
 func (r *LinkRepository) All(ctx context.Context) ([]domain.Link, error) {

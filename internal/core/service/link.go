@@ -38,9 +38,9 @@ func (s *LinkService) GetOriginalURL(ctx context.Context, shortID string) (*stri
 }
 
 func (s *LinkService) Create(ctx context.Context, link *domain.Link) error {
-	_, err := s.cache.Set(ctx, link.ShortID, link.OriginalURL)
+	_, err := s.cache.Set(ctx, link.Id, link.OriginalURL)
 	if err != nil {
-		return fmt.Errorf("failed to set short URL for identifier '%s': %w", link.ShortID, err)
+		return fmt.Errorf("failed to set short URL for identifier '%s': %w", link.Id, err)
 	}
 	err = s.db.Create(ctx, link)
 	if err != nil {

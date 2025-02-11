@@ -16,10 +16,7 @@ func main() {
 	cfg := config.LoadConfig()
 	redisAddress, redisPassword, redisDB := cfg.GetRedisParams()
 
-	repo, err := repository.NewLinkRepository(cfg)
-	if err != nil {
-		log.Fatalf("ошибка создания репозитория: %v", err)
-	}
+	repo := repository.NewLinkRepository(cfg)
 	cache := cache.NewRedisCache(redisAddress, redisPassword, redisDB)
 	service := service.NewLinkService(repo, cache)
 	handler := handler.NewURLHandler(service)

@@ -20,6 +20,7 @@ type Config struct {
 	MongoURI      string
 	Database      string
 	Collection    string
+	Stats         string
 	redisAddress  string
 	redisPassword string
 	redisDB       int
@@ -30,6 +31,7 @@ func LoadConfig() *Config {
 		MongoURI:      os.Getenv("MONGO_URI"),
 		Database:      os.Getenv("MONGO_DATABASE"),
 		Collection:    os.Getenv("MONGO_COLLECTION"),
+		Stats:         os.Getenv("MONGO_STATS"),
 		redisAddress:  "localhost:6379",
 		redisPassword: "",
 		redisDB:       0,
