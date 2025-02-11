@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Noviiich/golang-url-shortener/internal/core/domain"
+	"github.com/Noviiich/golang-url-shortener/internal/core/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +17,16 @@ type RequestBody struct {
 	Long string `json:"long"`
 }
 
-func (h *URLHandler) CreateShortLink(c *gin.Context) {
+type GenerateFunctionHandler struct {
+	linkService  *service.LinkService
+	statsService *service.StatsService
+}
+
+func NewGenerateFunctionHandler(l *service.LinkService, s *service.StatsService) *GenerateFunctionHandler {
+	return &GenerateFunctionHandler{linkService: l, statsService: s}
+}
+
+func (h *GenerateFunctionHandler) CreateShortLink(c *gin.Context) {
 	var requestBody RequestBody
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		fmt.Println(requestBody)
@@ -37,18 +47,28 @@ func (h *URLHandler) CreateShortLink(c *gin.Context) {
 	}
 
 	link := domain.Link{
-		ShortID:     generateShortUrl(requestBody.Long),
+		Id:          generateShortUrl(requestBody.Long),
 		OriginalURL: requestBody.Long,
 		CreateAt:    time.Now(),
 	}
 
-	err := h.service.Create(context.Background(), &link)
+	err := h.linkService.Create(context.Background(), &link)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"key": link.ShortID})
+	err = h.statsService.Create(context.Background(), &domain.Stats{
+		Platform:  domain.PlatformTwitter,
+		LinkID:    link.Id,
+		CreatedAt: link.CreateAt,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"key": link.Id})
 }
 
 func generateShortUrl(longUrl string) string {

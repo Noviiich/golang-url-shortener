@@ -19,7 +19,7 @@ func main() {
 	repo := repository.NewLinkRepository(cfg)
 	cache := cache.NewRedisCache(redisAddress, redisPassword, redisDB)
 	service := service.NewLinkService(repo, cache)
-	handler := handler.NewURLHandler(service)
+	handler := handler.NewRedirectFunctionHandler(service)
 
 	router := gin.Default()
 	router.GET("/:shortID", handler.RedirectShortURL)
