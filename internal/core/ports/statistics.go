@@ -11,4 +11,5 @@ type StatsPort interface {
 	Get(context.Context, string) (*domain.Stats, error)
 	Create(context.Context, *domain.Stats) error
 	Delete(context.Context, string) error
+	GetStatsByLinkID(context.Context, string) ([]domain.Stats, error)
 }
