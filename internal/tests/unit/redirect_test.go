@@ -5,6 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Noviiich/golang-url-shortener/internal/adapters/handler"
+	"github.com/Noviiich/golang-url-shortener/internal/adapters/mock"
+	"github.com/Noviiich/golang-url-shortener/internal/core/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,10 +62,19 @@ func TestRedirectUnit(t *testing.T) {
 }
 
 func setupTestRedirect() *gin.Engine {
-	handler := SetupTest()
+	gin.SetMode(gin.ReleaseMode)
+
+	mockLink := mock.NewMockRepository()
+
+	cache := mock.NewMockRedisCache()
+	FillCache(cache, mockLink.Links)
+
+	linkService := service.NewLinkService(mockLink, cache)
+
+	apiHandler := handler.NewRedirectFunctionHandler(linkService)
 
 	router := gin.Default()
-	router.GET("/:shortID", handler.RedirectShortURL)
+	router.GET("/:shortID", apiHandler.RedirectShortURL)
 
 	return router
 }

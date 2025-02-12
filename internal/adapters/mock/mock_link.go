@@ -9,23 +9,19 @@ import (
 
 type MockRepository struct {
 	Links []domain.Link
+	Stats []domain.Stats
 }
 
 func NewMockRepository() *MockRepository {
 	return &MockRepository{
-		Links: []domain.Link{
-			{Id: "testid1", OriginalURL: "https://example.com/link1"},
-			{Id: "testid2", OriginalURL: "https://example.com/link2"},
-			{Id: "testid3", OriginalURL: "https://example.com/link3"},
-		},
+		Links: MockLinkData,
+		Stats: MockStatsData,
 	}
 }
 
 func (m *MockRepository) All(ctx context.Context) ([]domain.Link, error) {
 	var links []domain.Link
-	for _, link := range m.Links {
-		links = append(links, link)
-	}
+	links = append(links, m.Links...)
 	return links, nil
 }
 func (m *MockRepository) Get(ctx context.Context, shortID string) (*domain.Link, error) {

@@ -6,6 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Noviiich/golang-url-shortener/internal/adapters/handler"
+	"github.com/Noviiich/golang-url-shortener/internal/adapters/mock"
+	"github.com/Noviiich/golang-url-shortener/internal/core/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -54,39 +57,21 @@ func TestGenerateUnit(t *testing.T) {
 }
 
 func setupTestGenerate() *gin.Engine {
-	handler := SetupTest()
+	gin.SetMode(gin.ReleaseMode)
+
+	mockLink := mock.NewMockRepository()
+	mockStats := mock.NewMockStatsRepo()
+
+	cache := mock.NewMockRedisCache()
+	FillCache(cache, mockLink.Links)
+
+	linkService := service.NewLinkService(mockLink, cache)
+	statsService := service.NewStatsService(mockStats, cache)
+
+	apiHandler := handler.NewGenerateFunctionHandler(linkService, statsService)
 
 	router := gin.Default()
-	router.POST("/generate", handler.CreateShortLink)
+	router.POST("/generate", apiHandler.CreateShortLink)
 
 	return router
 }
-
-// func TestCreateShortLink_Success(t *testing.T) {
-// 	body := `{"long": "https://example.com/abcdefg"}`
-// 	response, err := setupTestGenerate(body)
-
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusCreated, response.Code)
-
-// 	// var link model.Link
-// 	// err := json.Unmarshal([]byte(w.Body.String()), &link)                     потом добавить, чтобы возвращался ответ
-// 	// assert.NoError(t, err)
-// 	// assert.Equal(t, "https://example.com/abcdefg", link.OriginalURL)
-// }
-
-// func TestCreateShortLink_EmptyString(t *testing.T) {
-// 	body := `{"long":""}`
-// 	response, err := setupTestGenerate(body)
-
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusBadRequest, response.Code)
-// }
-
-// func TestCreateShoreLink_InvalidURL(t *testing.T) {
-// 	body := `{"long": "invalid"}`
-// 	response, err := setupTestGenerate(body)
-
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusBadRequest, response.Code)
-// }

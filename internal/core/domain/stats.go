@@ -25,7 +25,7 @@ func (p Platform) String() string {
 }
 
 type Stats struct {
+	Id        string    `json:"id" bson:"id"`
 	Platform  Platform  `json:"platform" bson:"platform"`
-	LinkID    string    `json:"link_id" bson:"link_id"`
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 }

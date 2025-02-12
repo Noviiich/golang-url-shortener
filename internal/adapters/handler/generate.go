@@ -60,7 +60,7 @@ func (h *GenerateFunctionHandler) CreateShortLink(c *gin.Context) {
 
 	err = h.statsService.Create(context.Background(), &domain.Stats{
 		Platform:  domain.PlatformTwitter,
-		LinkID:    link.Id,
+		Id:        link.Id,
 		CreatedAt: link.CreateAt,
 	})
 	if err != nil {
