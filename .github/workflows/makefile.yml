@@ -23,8 +23,11 @@ jobs:
     - name: Install dependencies
       run: go mod tidy
 
-    - name: Test
-      run: make test
+    - name: Unit Test
+      run: make unit-test
+
+    - name: Benchmark Test
+      run: make benchmark-test
 
     - name: Build
       run: make build

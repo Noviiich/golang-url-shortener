@@ -101,7 +101,7 @@ func (r *StatsRepository) Delete(ctx context.Context, id string) error {
 }
 
 func (r *StatsRepository) GetStatsByLinkID(ctx context.Context, id string) ([]domain.Stats, error) {
-	cursor, err := r.collection.Find(ctx, bson.M{"link_id": id})
+	cursor, err := r.collection.Find(ctx, bson.M{"id": id})
 	if err != nil {
 		return nil, fmt.Errorf("документ не найден: %w", err)
 	}
