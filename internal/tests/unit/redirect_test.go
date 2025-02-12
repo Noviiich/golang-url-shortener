@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/Noviiich/golang-url-shortener/internal/adapters/handler"
-	"github.com/Noviiich/golang-url-shortener/internal/adapters/mock"
 	"github.com/Noviiich/golang-url-shortener/internal/core/service"
+	"github.com/Noviiich/golang-url-shortener/internal/tests/mock"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

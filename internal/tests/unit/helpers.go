@@ -3,8 +3,8 @@ package unit
 import (
 	"context"
 
-	"github.com/Noviiich/golang-url-shortener/internal/adapters/mock"
 	"github.com/Noviiich/golang-url-shortener/internal/core/domain"
+	"github.com/Noviiich/golang-url-shortener/internal/tests/mock"
 )
 
 // func SetupTest() *handler.URLHandler {

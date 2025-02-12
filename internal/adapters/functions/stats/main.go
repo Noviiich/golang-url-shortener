@@ -25,7 +25,7 @@ func main() {
 	handler := handler.NewStatsFunctionHandler(linkService, statsService)
 
 	router := gin.Default()
-	router.POST("/stats", handler.Stats)
+	router.GET("/stats", handler.Stats)
 	if err := router.Run(":8083"); err != nil {
 		log.Fatal(err)
 	}
