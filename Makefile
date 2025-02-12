@@ -9,9 +9,12 @@ build:
 build-%:
 	cd internal/adapters/functions/$* && ${GO} build -o ${APP_NAME}
 
-test:
+unit-test:
 	@echo "Запуск тестов..."
-	go test ./... -cover
+	cd internal/tests/unit/$* && ${GO} test -v .
+
+benchmark-test:
+	cd internal/tests/benchmark/$* && ${GO} test -v -bench=.
 
 run:
 	${MAKE} ${MAKEOPTS} $(foreach function, $(FUNCTIONS), run-${function})
