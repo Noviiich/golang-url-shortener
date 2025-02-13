@@ -20,7 +20,7 @@ run:
 	${MAKE} ${MAKEOPTS} $(foreach function, $(FUNCTIONS), run-${function})
 
 run-%:
-	cd internal/adapters/functions/$* && ./${APP_NAME} &
+	cd internal/adapters/functions/$* && ./${APP_NAME}
 
 tidy:
 	go mod tidy
