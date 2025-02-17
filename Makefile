@@ -4,7 +4,7 @@ FUNCTIONS := generate redirect delete stats gateway
 
 
 build:
-	${MAKE} ${MAKEOPTS} $(foreach function,${FUNCTIONS}, build-${function})
+	${MAKE} -j ${MAKEOPTS} $(foreach function,${FUNCTIONS}, build-${function})
 
 build-%:
 	cd internal/adapters/functions/$* && ${GO} build -o ${APP_NAME}
