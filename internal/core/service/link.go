@@ -29,18 +29,23 @@ func (s *LinkService) All(ctx context.Context) ([]domain.Link, error) {
 }
 
 func (s *LinkService) GetOriginalURL(ctx context.Context, shortID string) (*string, error) {
+	linkCache, err := s.cache.Get(ctx, shortID)
+	if err == nil {
+		fmt.Printf("Данные взяты из кэша: %s", linkCache)
+		return &linkCache, nil
+	}
 	link, err := s.port.Get(ctx, shortID)
-	//link, err := s.cache.Get(ctx, shortID)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при получении короткого url for indentifier '%s': %w", shortID, err)
 	}
+	s.cache.Set(ctx, link.Id, link.OriginalURL)
 	return &link.OriginalURL, nil
 }
 
 func (s *LinkService) Create(ctx context.Context, link *domain.Link) error {
 	_, err := s.cache.Set(ctx, link.Id, link.OriginalURL)
 	if err != nil {
-		return fmt.Errorf("failed to set short URL for identifier '%s': %w", link.Id, err)
+		return fmt.Errorf("failed to set cache for identifier '%s': %w", link.Id, err)
 	}
 	err = s.port.Create(ctx, link)
 	if err != nil {

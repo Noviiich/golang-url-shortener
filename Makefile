@@ -26,7 +26,7 @@ tidy:
 	go mod tidy
 
 local:
-	${MAKE} -j ${MAKEOPTS} $(foreach function, $(FUNCTIONS), start-${function})
+	${MAKE} -j ${MAKEOPTS} $(foreach function, $(FUNCTIONS), local-${function})
 
 local-%:
 	cd internal/adapters/functions/$* && go run main.go

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -26,6 +27,8 @@ func (h *RedirectFunctionHandler) RedirectShortURL(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
+
+	fmt.Println("handler link", *link)
 
 	if err := h.statsService.Create(context.Background(), &domain.Stats{
 		Platform:  domain.PlatformTwitter,

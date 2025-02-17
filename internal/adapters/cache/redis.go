@@ -27,10 +27,10 @@ func (r *RedisCache) Set(ctx context.Context, key string, val string) (string, e
 
 func (r *RedisCache) Get(ctx context.Context, key string) (string, error) {
 	val, err := r.client.Get(ctx, key).Result()
-	if err == redis.Nil {
-		return "", nil
+	if err != nil {
+		return "", err
 	}
-	return val, err
+	return val, nil
 }
 
 func (r *RedisCache) Delete(ctx context.Context, key string) error {
