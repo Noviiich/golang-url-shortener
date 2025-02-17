@@ -1,6 +1,6 @@
 APP_NAME := golang-url-shortener
 GO := go
-FUNCTIONS := generate redirect gateway
+FUNCTIONS := generate redirect delete stats gateway
 
 
 build:
@@ -24,3 +24,9 @@ run-%:
 
 tidy:
 	go mod tidy
+
+local:
+	${MAKE} -j ${MAKEOPTS} $(foreach function, $(FUNCTIONS), start-${function})
+
+local-%:
+	cd internal/adapters/functions/$* && go run main.go

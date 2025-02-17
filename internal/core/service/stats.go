@@ -47,10 +47,10 @@ func (s *StatsService) Create(ctx context.Context, link *domain.Stats) error {
 func (s *StatsService) Delete(ctx context.Context, shortID string) error {
 	err := s.port.Delete(ctx, shortID)
 	if err != nil {
-		return fmt.Errorf("ошибка удаления короткого url for indentifier '%s': %w", shortID, err)
+		return fmt.Errorf("ошибка удаления статистики по indentifier '%s': %w", shortID, err)
 	}
 	if err := s.cache.Delete(ctx, shortID); err != nil {
-		return fmt.Errorf("failed to delete short URL for identifier '%s': %w", shortID, err)
+		return fmt.Errorf("failed to delete stats for identifier '%s': %w", shortID, err)
 	}
 	return nil
 }

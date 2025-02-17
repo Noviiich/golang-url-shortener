@@ -86,15 +86,15 @@ func (r *StatsRepository) Get(ctx context.Context, id string) (*domain.Stats, er
 func (r *StatsRepository) Create(ctx context.Context, stats *domain.Stats) error {
 	_, err := r.collection.InsertOne(ctx, stats)
 	if err != nil {
-		return fmt.Errorf("не удалось добавить элемент в MongoDB: %w", err)
+		return fmt.Errorf("не удалось добавить элемент статистики в MongoDB: %w", err)
 	}
 	return nil
 }
 
 func (r *StatsRepository) Delete(ctx context.Context, id string) error {
-	_, err := r.collection.DeleteOne(ctx, bson.M{"id": id})
+	_, err := r.collection.DeleteMany(ctx, bson.M{"id": id})
 	if err != nil {
-		return fmt.Errorf("ошибка удаления элемента из MongoDB: %w", err)
+		return fmt.Errorf("ошибка удаления элементов статистики из MongoDB: %w", err)
 	}
 
 	return nil
