@@ -65,13 +65,15 @@ func setupTestRedirect() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 
 	mockLink := mock.NewMockRepository()
+	mockStats := mock.NewMockStatsRepo()
 
 	cache := mock.NewMockRedisCache()
 	FillCache(cache, mockLink.Links)
 
 	linkService := service.NewLinkService(mockLink, cache)
+	statsService := service.NewStatsService(mockStats, cache)
 
-	apiHandler := handler.NewRedirectFunctionHandler(linkService)
+	apiHandler := handler.NewRedirectFunctionHandler(linkService, statsService)
 
 	router := gin.Default()
 	router.GET("/:shortID", apiHandler.RedirectShortURL)

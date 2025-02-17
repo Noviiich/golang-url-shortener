@@ -26,7 +26,7 @@ func NewStatsRepository(cfg *config.Config) *StatsRepository {
 		log.Fatal("MongoDB database is empty")
 		return nil
 	}
-	if cfg.Collection == "" {
+	if cfg.StatsCollection == "" {
 		log.Fatal("MongoDB collection is empty")
 		return nil
 	}
@@ -47,7 +47,7 @@ func NewStatsRepository(cfg *config.Config) *StatsRepository {
 		return nil
 	}
 
-	stats := client.Database(cfg.Database).Collection(cfg.Stats)
+	stats := client.Database(cfg.Database).Collection(cfg.StatsCollection)
 
 	return &StatsRepository{
 		client:     client,

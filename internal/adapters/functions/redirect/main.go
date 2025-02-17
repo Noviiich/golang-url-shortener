@@ -15,11 +15,14 @@ import (
 func main() {
 	cfg := config.LoadConfig()
 	redisAddress, redisPassword, redisDB := cfg.GetRedisParams()
-
-	repo := repository.NewLinkRepository(cfg)
 	cache := cache.NewRedisCache(redisAddress, redisPassword, redisDB)
-	service := service.NewLinkService(repo, cache)
-	handler := handler.NewRedirectFunctionHandler(service)
+
+	linkRepo := repository.NewLinkRepository(cfg)
+	statsRepo := repository.NewStatsRepository(cfg)
+
+	linkService := service.NewLinkService(linkRepo, cache)
+	statsService := service.NewStatsService(statsRepo, cache)
+	handler := handler.NewRedirectFunctionHandler(linkService, statsService)
 
 	router := gin.Default()
 	router.GET("/:shortID", handler.RedirectShortURL)

@@ -58,12 +58,11 @@ func (h *GenerateFunctionHandler) CreateShortLink(c *gin.Context) {
 		return
 	}
 
-	err = h.statsService.Create(context.Background(), &domain.Stats{
+	if err := h.statsService.Create(context.Background(), &domain.Stats{
 		Platform:  domain.PlatformTwitter,
 		Id:        link.Id,
 		CreatedAt: link.CreateAt,
-	})
-	if err != nil {
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

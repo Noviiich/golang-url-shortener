@@ -26,7 +26,7 @@ func NewLinkRepository(cfg *config.Config) *LinkRepository {
 		log.Fatal("MongoDB database is empty")
 		return nil
 	}
-	if cfg.Collection == "" {
+	if cfg.LinksCollection == "" {
 		log.Fatal("MongoDB collection is empty")
 		return nil
 	}
@@ -47,7 +47,7 @@ func NewLinkRepository(cfg *config.Config) *LinkRepository {
 		return nil
 	}
 
-	coll := client.Database(cfg.Database).Collection(cfg.Collection)
+	coll := client.Database(cfg.Database).Collection(cfg.LinksCollection)
 
 	return &LinkRepository{
 		Client:     client,
@@ -72,10 +72,10 @@ func (r *LinkRepository) All(ctx context.Context) ([]domain.Link, error) {
 
 func (r *LinkRepository) Get(ctx context.Context, shortID string) (*domain.Link, error) {
 	var link domain.Link
-	err := r.Collection.FindOne(ctx, bson.M{"short_id": shortID}).Decode(&link)
+	err := r.Collection.FindOne(ctx, bson.M{"id": shortID}).Decode(&link)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("документ с short_id '%s' не найден", shortID)
+			return nil, fmt.Errorf("документ с id '%s' не найден", shortID)
 		}
 		return nil, fmt.Errorf("ошибка поиска документа: %w", err)
 	}
@@ -92,7 +92,7 @@ func (r *LinkRepository) Create(ctx context.Context, link *domain.Link) error {
 }
 
 func (r *LinkRepository) Delete(ctx context.Context, shortID string) error {
-	_, err := r.Collection.DeleteOne(ctx, bson.M{"short_id": shortID})
+	_, err := r.Collection.DeleteOne(ctx, bson.M{"id": shortID})
 	if err != nil {
 		return fmt.Errorf("ошибка удаления элемента из MongoDB: %w", err)
 	}
