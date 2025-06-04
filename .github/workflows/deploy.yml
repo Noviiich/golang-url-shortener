@@ -1,0 +1,34 @@
+name: Deploy App
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy'
+        required: true
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.23'
+
+    - name: Install dependencies
+      run: go mod tidy
+
+    - name: Unit Test
+      run: make unit-test
+
+    - name: Benchmark Test
+      run: make benchmark-test
+
+    - name: Build
+      run: make build
