@@ -27,6 +27,7 @@ type Response struct {
 	Alias string `json:"alias"`
 }
 
+//go:generate go run github.com/vektra/mockery/v2@latest --name=URLSaver
 type URLSaver interface {
 	SaveURL(urlToSave string, alias string) (int64, error)
 }
@@ -43,8 +44,9 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		var req Request
 
 		err := render.DecodeJSON(r.Body, &req)
+		log.Debug(req.Alias)
 		if err != nil {
-			// обработка ощибки при пустом теле запроса
+			// обработка ошибки при пустом теле запроса
 			if errors.Is(err, io.EOF) {
 				log.Error("request body is empty")
 				render.JSON(w, r, resp.Error("empty request"))
