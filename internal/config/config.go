@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
 )
 
@@ -17,11 +18,39 @@ func init() {
 }
 
 type Config struct {
+	Env             string `yaml:"env" env-required:"true"`
+	StoragePath     string `yaml:"storage_path" env-required:"true"`
+	HTTPServer      `yaml:"http_server"`
 	MongoURI        string
 	Database        string
 	LinksCollection string
 	StatsCollection string
 	Redis           RedisConfig
+}
+
+type HTTPServer struct {
+	Address     string `yaml:"address" env-default:"localhost:8082"`
+	Timeout     string `yaml:"timeout" env-default:"4s"`
+	IdleTimeout string `yaml:"idle_timeout" env-default:"30s"`
+}
+
+func MustLoad() *Config {
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		log.Fatal("CONFIG_PATH is not set")
+	}
+
+	// Check if the config file exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		log.Fatalf("config file does not exist: %s", configPath)
+	}
+
+	var cfg Config
+	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+		log.Fatalf("error reading config file: %s", err)
+	}
+
+	return &cfg
 }
 
 type RedisConfig struct {
