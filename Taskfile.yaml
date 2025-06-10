@@ -8,3 +8,8 @@ tasks:
     desc: "Run database migrations"
     cmds:
       - go run ./cmd/migrator --storage-path=./storage/shortener.db --migrations-path=./migrations
+  start: ##команда
+    desc: "Run project"
+    cmds:
+    - go run ./cmd/url-shortener
+  
