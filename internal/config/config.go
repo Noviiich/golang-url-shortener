@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
@@ -29,11 +30,11 @@ type Config struct {
 }
 
 type HTTPServer struct {
-	Address     string `yaml:"address" env-default:"localhost:8082"`
-	Timeout     string `yaml:"timeout" env-default:"4s"`
-	IdleTimeout string `yaml:"idle_timeout" env-default:"30s"`
-	User        string `yaml:"user" env-required:"true"`
-	Password    string `yaml:"password" env-required:"true" env:"HTTP_SERVER_PASSWORD"`
+	Address     string        `yaml:"address" env-default:"localhost:8082"`
+	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"30s"`
+	User        string        `yaml:"user" env-required:"true"`
+	Password    string        `yaml:"password" env-required:"true" env:"HTTP_SERVER_PASSWORD"`
 }
 
 func MustLoad() *Config {
