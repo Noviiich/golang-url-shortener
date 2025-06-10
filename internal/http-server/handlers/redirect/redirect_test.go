@@ -26,6 +26,7 @@ func TestGetHandler(t *testing.T) {
 			alias: "test",
 			url:   "https://google.com",
 		},
+		// TODO: add more cases
 	}
 
 	for _, tc := range cases {
@@ -47,10 +48,12 @@ func TestGetHandler(t *testing.T) {
 
 			redirectedToURL, err := api.GetRedirect(ts.URL + "/" + tc.alias)
 			require.NoError(t, err)
+			//assert.Equal(t, tc.respError, err)
 
 			// Check the final URL after redirection.
 			assert.Equal(t, tc.url, redirectedToURL)
 
+			// TODO: add more assertions
 		})
 	}
 }
