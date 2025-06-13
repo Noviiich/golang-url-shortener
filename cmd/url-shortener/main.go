@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
 
+	ssogrpc "github.com/Noviiich/golang-url-shortener/internal/clients/sso/grcp"
 	"github.com/Noviiich/golang-url-shortener/internal/config"
 	"github.com/Noviiich/golang-url-shortener/internal/http-server/handlers/redirect"
 	"github.com/Noviiich/golang-url-shortener/internal/http-server/handlers/url/save"
@@ -28,6 +30,19 @@ func main() {
 	}
 
 	log.Info("staring db")
+
+	ssoClient, err := ssogrpc.New(
+		context.Background(),
+		log, cfg.Clients.SSO.Address,
+		cfg.Clients.SSO.Timeout,
+		cfg.Clients.SSO.RetriesCount,
+	)
+	if err != nil {
+		log.Error("failed to initialize sso client")
+		os.Exit(1)
+	}
+
+	ssoClient.IsAdmin(context.Background(), 1)
 
 	//middleware
 	router := chi.NewRouter()
