@@ -7,7 +7,7 @@ http_server:
   user: "novich57"
 clients:
   sso:
-    address: "localhost:44044"
+    address: "103.74.92.23:44044"
     timeout: 4s
     retries_count: 3
 app_secret: "test-secret"
