@@ -10,6 +10,7 @@ import (
 	"github.com/Noviiich/golang-url-shortener/internal/config"
 	"github.com/Noviiich/golang-url-shortener/internal/http-server/handlers/redirect"
 	"github.com/Noviiich/golang-url-shortener/internal/http-server/handlers/url/save"
+	"github.com/Noviiich/golang-url-shortener/internal/http-server/middleware/auth"
 	mwLogger "github.com/Noviiich/golang-url-shortener/internal/http-server/middleware/logger"
 	"github.com/Noviiich/golang-url-shortener/internal/lib/logger/handlers/slogpretty"
 	"github.com/Noviiich/golang-url-shortener/internal/storage/sqlite"
@@ -42,8 +43,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	ssoClient.IsAdmin(context.Background(), 1)
-
 	//middleware
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID) // Добавляет request_id в каждый запрос, для трейсинга
@@ -52,20 +51,19 @@ func main() {
 	router.Use(middleware.Recoverer) // Если где-то внутри сервера (обработчика запроса) произойдет паника, приложение не должно упасть
 	router.Use(middleware.URLFormat) // Парсер URLов поступающих запросов
 
-	router.Route("/url", func(r chi.Router) {
-		// Подключаем авторизацию
-		r.Use(middleware.BasicAuth("url-shortener", map[string]string{
-			// Передаем в middleware креды
-			cfg.HTTPServer.User: cfg.HTTPServer.Password,
-			// Если у вас более одного пользователя,
-			// то можете добавить остальные пары по аналогии.
-		}))
-
-		r.Post("/", save.New(log, storage))
-	})
-
 	// Хэндлер redirect остается снаружи, в основном роутере
 	router.Get("/{alias}", redirect.New(log, storage))
+
+	// Группа маршрутов с SSO аутентификацией
+	router.Route("/url", func(r chi.Router) {
+		// Заменяем BasicAuth на SSO middleware
+		r.Use(auth.New(log, cfg.AppSecret, ssoClient))
+
+		// TODO: добавить обработчики
+		r.Post("/", save.New(log, storage))
+		// r.Delete("/{alias}", delete.New(log, storage))
+		// r.Get("/{alias}/stats", stats.New(log, storage))
+	})
 
 	srv := &http.Server{
 		Addr:         cfg.Address,
