@@ -40,7 +40,7 @@ type Client struct {
 }
 
 type ClientConfig struct {
-	SSO Client `yaml:"client"`
+	SSO Client `yaml:"sso"`
 }
 
 func MustLoad() *Config {
