@@ -6,6 +6,7 @@ require (
 	github.com/Noviiich/sso v0.0.0-20250603183523-c075ba4a2b08
 	github.com/fatih/color v1.18.0
 	github.com/gavv/httpexpect/v2 v2.17.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
 	google.golang.org/grpc v1.72.2
 )
