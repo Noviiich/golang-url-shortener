@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/Noviiich/golang-url-shortener/internal/http-server/middleware/auth"
 	resp "github.com/Noviiich/golang-url-shortener/internal/lib/api/response"
 	"github.com/Noviiich/golang-url-shortener/internal/lib/logger/sl"
 	"github.com/Noviiich/golang-url-shortener/internal/lib/random"
@@ -39,6 +40,36 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		log = log.With(
 			slog.String("op", op),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
+
+		ctx := r.Context()
+
+		// Проверяем наличие ошибки аутентификации
+		if authErr, hasError := auth.ErrorFromContext(ctx); hasError {
+			log.Error("authentication failed", sl.Err(authErr))
+			render.JSON(w, r, resp.Error("authentication required"))
+			return
+		}
+
+		// Получаем ID пользователя
+		userID, hasUID := auth.UIDFromContext(ctx)
+		if !hasUID {
+			log.Error("user ID not found in context")
+			render.JSON(w, r, resp.Error("unauthorized"))
+			return
+		}
+
+		// Получаем информацию о том, является ли пользователь админом
+		isAdmin, _ := auth.IsAdminFromContext(ctx)
+		// if !hasUID {
+		// 	log.Error("user ID not found in context")
+		// 	render.JSON(w, r, resp.Error("unauthorized"))
+		// 	return
+		// }
+		// Добавляем информацию о пользователе в логи
+		log = log.With(
+			slog.Int64("user_id", userID),
+			slog.Bool("is_admin", isAdmin),
 		)
 
 		var req Request
