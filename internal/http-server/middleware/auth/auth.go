@@ -79,7 +79,7 @@ func New(
 			// Полученны данные сохраняем в контекст,
 			// откуда его смогут получить следующие хэндлеры.
 			ctx := context.WithValue(r.Context(), uidKey, claims.UID)
-			ctx = context.WithValue(r.Context(), isAdminKey, isAdmin)
+			ctx = context.WithValue(ctx, isAdminKey, isAdmin)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -104,4 +104,9 @@ func UIDFromContext(ctx context.Context) (int64, bool) {
 func ErrorFromContext(ctx context.Context) (error, bool) {
 	err, ok := ctx.Value(errorKey).(error)
 	return err, ok
+}
+
+func IsAdminFromContext(ctx context.Context) (bool, bool) {
+	isAdmin, ok := ctx.Value(isAdminKey).(bool)
+	return isAdmin, ok
 }
