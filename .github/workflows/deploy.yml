@@ -60,8 +60,8 @@ jobs:
         run: |
           ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "\
           cd ${{ env.DEPLOY_DIRECTORY }} && \
-          docker-compose down redis || true && \
-          docker-compose up -d redis"
+          docker-compose down || true && \
+          docker-compose up -d"
       - name: Create environment file on server
         run: |
           ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "\
