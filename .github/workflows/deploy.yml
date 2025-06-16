@@ -56,6 +56,12 @@ jobs:
         run: |
           echo "Listing deployment folder contents:"
           ls -la ${{ github.workspace }}/deployment
+      - name: Start Redis container
+        run: |
+          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "\
+          cd ${{ env.DEPLOY_DIRECTORY }} && \
+          docker-compose down redis || true && \
+          docker-compose up -d redis"
       - name: Create environment file on server
         run: |
           ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "\
