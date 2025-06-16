@@ -50,7 +50,7 @@ func New(log *slog.Logger, urlSaver URLSaver, cache URLCacheSaver) http.HandlerF
 		ctx := r.Context()
 
 		// Проверяем наличие ошибки аутентификации
-		if authErr, hasError := auth.ErrorFromContext(ctx); !hasError {
+		if authErr, hasError := auth.ErrorFromContext(ctx); hasError {
 			log.Error("authentication failed", sl.Err(authErr))
 			render.JSON(w, r, resp.Error("authentication required"))
 			return
