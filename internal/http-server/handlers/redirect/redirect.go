@@ -1,6 +1,7 @@
 package redirect
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -13,9 +14,13 @@ import (
 	"github.com/go-chi/render"
 )
 
-//go:generate go run github.com/vektra/mockery/v2@latest --name=URLGetter
 type URLGetter interface {
 	GetURL(alias string) (string, error)
+}
+
+//go:generate go run github.com/vektra/mockery/v2@latest --name=URLCacheGetter
+type URLCacheGetter interface {
+	GetURL(ctx context.Context, alias string) (string, error)
 }
 
 type Request struct {
@@ -27,7 +32,7 @@ type Response struct {
 	URL      string        `json:"url"`
 }
 
-func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
+func New(log *slog.Logger, urlGetter URLGetter, cache URLCacheGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.redirect.New"
 
@@ -42,6 +47,14 @@ func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 			render.JSON(w, r, resp.Error("invalid request"))
 			return
 		}
+
+		cacheURL, err := cache.GetURL(r.Context(), alias)
+		if err == nil {
+			log.Info("cache url found", slog.String("url", cacheURL))
+			http.Redirect(w, r, cacheURL, http.StatusFound)
+			return
+		}
+		log.Info("failed to get url from cache", sl.Err(err))
 
 		resURL, err := urlGetter.GetURL(alias)
 		if err != nil {

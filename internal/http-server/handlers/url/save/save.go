@@ -1,6 +1,7 @@
 package save
 
 import (
+	"context"
 	"errors"
 	"io"
 	"log/slog"
@@ -28,12 +29,16 @@ type Response struct {
 	Alias string `json:"alias"`
 }
 
-//go:generate go run github.com/vektra/mockery/v2@latest --name=URLSaver
 type URLSaver interface {
 	SaveURL(urlToSave string, alias string) (int64, error)
 }
 
-func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
+//go:generate go run github.com/vektra/mockery/v2@latest --name=URLCacheSaver
+type URLCacheSaver interface {
+	SaveURL(ctx context.Context, urlToSave string, alias string) error
+}
+
+func New(log *slog.Logger, urlSaver URLSaver, cache URLCacheSaver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.url.save.New"
 
@@ -45,7 +50,7 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		ctx := r.Context()
 
 		// Проверяем наличие ошибки аутентификации
-		if authErr, hasError := auth.ErrorFromContext(ctx); hasError {
+		if authErr, hasError := auth.ErrorFromContext(ctx); !hasError {
 			log.Error("authentication failed", sl.Err(authErr))
 			render.JSON(w, r, resp.Error("authentication required"))
 			return
@@ -120,6 +125,10 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 			return
 		}
 
+		err = cache.SaveURL(ctx, req.URL, alias)
+		if err != nil {
+			log.Info("failed to save cache url ", sl.Err(err))
+		}
 		log.Info("url added", slog.Int64("id", id))
 		responseOK(w, r, alias)
 	}

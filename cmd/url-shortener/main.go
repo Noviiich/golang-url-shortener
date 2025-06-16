@@ -13,9 +13,16 @@ import (
 	"github.com/Noviiich/golang-url-shortener/internal/http-server/middleware/auth"
 	mwLogger "github.com/Noviiich/golang-url-shortener/internal/http-server/middleware/logger"
 	"github.com/Noviiich/golang-url-shortener/internal/lib/logger/handlers/slogpretty"
+	"github.com/Noviiich/golang-url-shortener/internal/storage/redis"
 	"github.com/Noviiich/golang-url-shortener/internal/storage/sqlite"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+)
+
+var (
+	redisAddr     = "localhost:6379"
+	redisPassword = ""
+	redisDB       = 0
 )
 
 func main() {
@@ -31,6 +38,16 @@ func main() {
 	}
 
 	log.Info("staring db")
+
+	cache, err := redis.New(
+		redisAddr, redisPassword, redisDB,
+	)
+	if err != nil {
+		log.Error("failed to initialize redis")
+		os.Exit(1)
+	}
+
+	log.Info("staring redis")
 
 	ssoClient, err := ssogrpc.New(
 		context.Background(),
@@ -52,7 +69,7 @@ func main() {
 	router.Use(middleware.URLFormat) // Парсер URLов поступающих запросов
 
 	// Хэндлер redirect остается снаружи, в основном роутере
-	router.Get("/{alias}", redirect.New(log, storage))
+	router.Get("/{alias}", redirect.New(log, storage, cache))
 
 	// Группа маршрутов с SSO аутентификацией
 	router.Route("/url", func(r chi.Router) {
@@ -60,7 +77,7 @@ func main() {
 		r.Use(auth.New(log, cfg.AppSecret, ssoClient))
 
 		// TODO: добавить обработчики
-		r.Post("/", save.New(log, storage))
+		r.Post("/", save.New(log, storage, cache))
 		// r.Delete("/{alias}", delete.New(log, storage))
 		// r.Get("/{alias}/stats", stats.New(log, storage))
 	})
